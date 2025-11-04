@@ -1,0 +1,5 @@
+__pycache__
+outputs/
+test_results/
+**.egg.info/
+*.DS_Store
