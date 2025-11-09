@@ -22,6 +22,7 @@ from backend.services.dataset_converter import (
     DatasetSplitter,
     DataAugmentationConfig,
 )
+from backend.services.yolo_trainer import YOLOTrainer
 
 __all__ = [
     "HunyuanImageGenerator",
@@ -36,4 +37,5 @@ __all__ = [
     "COCODatasetConverter",
     "DatasetSplitter",
     "DataAugmentationConfig",
+    "YOLOTrainer",
 ]
