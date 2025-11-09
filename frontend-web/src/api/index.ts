@@ -1,4 +1,7 @@
 export { projectsApi } from './projects'
 export { generationApi } from './generation'
 export { imagesApi } from './images'
+export { annotationApi } from './annotation'
+export { datasetsApi } from './datasets'
+export { trainingApi } from './training'
 export { default as apiClient } from './client'

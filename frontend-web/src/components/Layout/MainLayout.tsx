@@ -31,36 +31,6 @@ const MainLayout = () => {
       icon: <ProjectOutlined />,
       label: '项目管理',
     },
-    {
-      key: 'generation',
-      icon: <PictureOutlined />,
-      label: '图片生成',
-      disabled: true,
-    },
-    {
-      key: 'images',
-      icon: <TagsOutlined />,
-      label: '图片审核',
-      disabled: true,
-    },
-    {
-      key: 'annotation',
-      icon: <TagsOutlined />,
-      label: '标注管理',
-      disabled: true,
-    },
-    {
-      key: 'datasets',
-      icon: <DatabaseOutlined />,
-      label: '数据集',
-      disabled: true,
-    },
-    {
-      key: 'training',
-      icon: <RocketOutlined />,
-      label: '模型训练',
-      disabled: true,
-    },
   ]
 
   // Get selected key from location

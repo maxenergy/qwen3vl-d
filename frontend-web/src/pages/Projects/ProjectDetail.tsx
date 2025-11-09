@@ -10,7 +10,14 @@ import {
   Spin,
   Alert,
 } from 'antd'
-import { ArrowLeftOutlined, PictureOutlined, TagsOutlined } from '@ant-design/icons'
+import {
+  ArrowLeftOutlined,
+  PictureOutlined,
+  TagsOutlined,
+  BgColorsOutlined,
+  DatabaseOutlined,
+  RocketOutlined,
+} from '@ant-design/icons'
 import { projectsApi } from '@/api'
 
 const { Title } = Typography
@@ -81,7 +88,7 @@ const ProjectDetail = () => {
       </Card>
 
       <Card title="快速操作" style={{ marginTop: 16 }}>
-        <Space>
+        <Space wrap>
           <Button
             type="primary"
             icon={<PictureOutlined />}
@@ -94,6 +101,24 @@ const ProjectDetail = () => {
             onClick={() => navigate(`/projects/${projectId}/images`)}
           >
             图片审核
+          </Button>
+          <Button
+            icon={<BgColorsOutlined />}
+            onClick={() => navigate(`/projects/${projectId}/annotation`)}
+          >
+            标注管理
+          </Button>
+          <Button
+            icon={<DatabaseOutlined />}
+            onClick={() => navigate(`/projects/${projectId}/datasets`)}
+          >
+            数据集
+          </Button>
+          <Button
+            icon={<RocketOutlined />}
+            onClick={() => navigate(`/projects/${projectId}/training`)}
+          >
+            训练管理
           </Button>
         </Space>
       </Card>
