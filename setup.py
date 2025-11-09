@@ -41,4 +41,9 @@ setup(
             "flake8>=4.0.0",
         ],
     },
+    entry_points={
+        "console_scripts": [
+            "qwen3vl-annotate=qwen3vl_d.cli.main:cli",
+        ],
+    },
 )
