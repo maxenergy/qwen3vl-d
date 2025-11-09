@@ -1,4 +1,6 @@
-# API接口文档
+# API 接口文档
+
+AI Auto-Annotation Tool 完整 API 参考文档
 
 ## 基础信息
 
@@ -6,6 +8,20 @@
 **认证方式:** 暂不需要 (MVP版本)
 **内容类型:** `application/json`
 **字符编码:** `UTF-8`
+
+**API 版本:** v1.0
+**总端点数:** 52 个
+
+## 端点概览
+
+| 模块 | 端点数 | 描述 |
+|------|--------|------|
+| [1. 项目管理](#1-项目管理-api) | 9 | 项目和标签的 CRUD 操作 |
+| [2. 图片生成](#2-图片生成-api) | 8 | Hunyuan 图片生成任务管理 |
+| [3. 图片审核](#3-图片审核-api) | 7 | 图片审核和批量操作 |
+| [4. 自动标注](#4-自动标注-api) | 12 | Qwen3-VL 自动标注和审核 |
+| [5. 数据集管理](#5-数据集管理-api) | 8 | YOLO/COCO 数据集生成和导出 |
+| [6. 训练管理](#6-训练管理-api) | 8 | YOLO 模型训练和管理 |
 
 ---
 
@@ -186,9 +202,9 @@
 
 ---
 
-## 3. 图片生成 API
+## 2. 图片生成 API
 
-### 3.1 创建生成任务
+### 2.1 创建生成任务
 
 **端点:** `POST /api/v1/projects/{project_id}/generation/tasks`
 
@@ -251,9 +267,20 @@
 }
 ```
 
-### 3.2 获取生成任务状态
+### 2.2 获取项目的生成任务列表
 
-**端点:** `GET /api/v1/generation/tasks/{task_id}`
+**端点:** `GET /api/v1/projects/{project_id}/generation/tasks`
+
+**查询参数:**
+- `page` (int, 默认: 1) - 页码
+- `per_page` (int, 默认: 20) - 每页数量
+- `status` (string, 可选) - 过滤状态
+
+**响应:** `200 OK`
+
+### 2.3 获取生成任务详情
+
+**端点:** `GET /api/v1/projects/{project_id}/generation/tasks/{task_id}`
 
 **响应:** `200 OK`
 ```json
@@ -281,9 +308,15 @@
 - `failed` - 失败
 - `cancelled` - 已取消
 
-### 3.3 获取生成的图片列表
+### 2.4 删除生成任务
 
-**端点:** `GET /api/v1/generation/tasks/{task_id}/images`
+**端点:** `DELETE /api/v1/projects/{project_id}/generation/tasks/{task_id}`
+
+**响应:** `204 No Content`
+
+### 2.5 获取任务的生成图片列表
+
+**端点:** `GET /api/v1/projects/{project_id}/generation/tasks/{task_id}/images`
 
 **查询参数:**
 - `page` (int) - 页码
@@ -312,9 +345,78 @@
 }
 ```
 
-### 3.4 审核图片
+### 2.6 批量创建生成任务
 
-**端点:** `POST /api/v1/images/{image_id}/review`
+**端点:** `POST /api/v1/projects/{project_id}/generation/batch`
+
+**请求体:**
+```json
+{
+  "tasks": [
+    {
+      "name": "batch_001",
+      "prompt": "A person smoking",
+      "batch_size": 50
+    },
+    {
+      "name": "batch_002",
+      "prompt": "Cigarette on ground",
+      "batch_size": 50
+    }
+  ]
+}
+```
+
+**响应:** `201 Created`
+
+### 2.7 获取提示词模板列表
+
+**端点:** `GET /api/v1/templates`
+
+**响应:** `200 OK`
+```json
+{
+  "templates": [
+    {
+      "name": "general_scene",
+      "category": "general",
+      "description": "通用场景模板",
+      "variables": ["time", "location", "weather"]
+    }
+  ]
+}
+```
+
+### 2.8 获取单个模板详情
+
+**端点:** `GET /api/v1/templates/{template_name}`
+
+**响应:** `200 OK`
+
+---
+
+## 3. 图片审核 API
+
+### 3.1 获取项目图片列表
+
+**端点:** `GET /api/v1/projects/{project_id}/images`
+
+**查询参数:**
+- `page` (int) - 页码
+- `per_page` (int) - 每页数量
+- `review_status` (string) - pending, approved, rejected
+
+**响应:** `200 OK`
+
+### 3.2 获取图片详情
+
+**端点:** `GET /api/v1/projects/{project_id}/images/{image_id}`
+
+**响应:** `200 OK`
+
+### 3.3 审核图片
+
+**端点:** `PATCH /api/v1/projects/{project_id}/images/{image_id}/review`
 
 **请求体:**
 ```json
@@ -326,9 +428,9 @@
 
 **响应:** `200 OK`
 
-### 3.5 批量审核
+### 3.4 批量审核图片
 
-**端点:** `POST /api/v1/images/batch-review`
+**端点:** `POST /api/v1/projects/{project_id}/images/review/batch`
 
 **请求体:**
 ```json
@@ -345,50 +447,45 @@
 }
 ```
 
-### 3.6 任务控制
+### 3.5 删除图片
 
-**暂停任务:** `POST /api/v1/generation/tasks/{task_id}/pause`
-**恢复任务:** `POST /api/v1/generation/tasks/{task_id}/resume`
-**取消任务:** `POST /api/v1/generation/tasks/{task_id}/cancel`
+**端点:** `DELETE /api/v1/projects/{project_id}/images/{image_id}`
 
-**响应:** `200 OK`
+**响应:** `204 No Content`
 
-### 3.7 获取提示词模板
+### 3.6 批量删除图片
 
-**端点:** `GET /api/v1/templates/prompts`
+**端点:** `POST /api/v1/projects/{project_id}/images/delete/batch`
+
+**请求体:**
+```json
+{
+  "image_ids": [1, 2, 3, 4, 5]
+}
+```
+
+**响应:** `204 No Content`
+
+### 3.7 获取图片统计信息
+
+**端点:** `GET /api/v1/projects/{project_id}/images/statistics`
 
 **响应:** `200 OK`
 ```json
 {
-  "categories": [
-    {
-      "name": "traffic",
-      "display_name": "交通场景",
-      "templates": [
-        {
-          "id": "traffic_smoking",
-          "name": "交通场景-吸烟检测",
-          "template": "A {time} photo of {location} with smoking people...",
-          "variables": {
-            "time": {
-              "type": "enum",
-              "options": ["daytime", "night", "dusk"]
-            },
-            "location": {
-              "type": "enum",
-              "options": ["street", "park", "bus stop"]
-            }
-          }
-        }
-      ]
-    }
-  ]
+  "total": 100,
+  "pending": 20,
+  "approved": 70,
+  "rejected": 10,
+  "avg_file_size_mb": 1.2
 }
 ```
 
 ---
 
 ## 4. 自动标注 API
+
+标注任务使用 Qwen3-VL 进行自动目标检测和边界框生成。
 
 ### 4.1 创建标注任务
 
@@ -429,9 +526,20 @@
 }
 ```
 
-### 4.2 获取标注任务状态
+### 4.2 获取项目的标注任务列表
 
-**端点:** `GET /api/v1/annotation/tasks/{task_id}`
+**端点:** `GET /api/v1/projects/{project_id}/annotation/tasks`
+
+**查询参数:**
+- `page` (int) - 页码
+- `per_page` (int) - 每页数量
+- `status` (string, 可选) - 过滤状态
+
+**响应:** `200 OK`
+
+### 4.3 获取标注任务详情
+
+**端点:** `GET /api/v1/projects/{project_id}/annotation/tasks/{task_id}`
 
 **响应:** `200 OK`
 ```json
@@ -450,9 +558,15 @@
 }
 ```
 
-### 4.3 获取标注结果
+### 4.4 删除标注任务
 
-**端点:** `GET /api/v1/annotation/tasks/{task_id}/results`
+**端点:** `DELETE /api/v1/projects/{project_id}/annotation/tasks/{task_id}`
+
+**响应:** `204 No Content`
+
+### 4.5 获取任务的所有标注
+
+**端点:** `GET /api/v1/projects/{project_id}/annotation/tasks/{task_id}/annotations`
 
 **查询参数:**
 - `page` (int)
@@ -493,9 +607,36 @@
 }
 ```
 
-### 4.4 校验标注
+### 4.6 获取图片的所有标注
 
-**端点:** `POST /api/v1/annotations/{annotation_id}/verify`
+**端点:** `GET /api/v1/projects/{project_id}/images/{image_id}/annotations`
+
+**响应:** `200 OK`
+```json
+{
+  "image_id": 1001,
+  "annotations": [
+    {
+      "id": 5001,
+      "label_id": 1,
+      "label_name": "smoking_person",
+      "bbox": [100, 200, 300, 400],
+      "confidence": 0.85,
+      "is_verified": true
+    }
+  ]
+}
+```
+
+### 4.7 获取单个标注详情
+
+**端点:** `GET /api/v1/projects/{project_id}/annotations/{annotation_id}`
+
+**响应:** `200 OK`
+
+### 4.8 审核/修改标注
+
+**端点:** `PATCH /api/v1/projects/{project_id}/annotations/{annotation_id}/review`
 
 **请求体:**
 ```json
@@ -508,55 +649,62 @@
 
 **响应:** `200 OK`
 
-### 4.5 批量校验
+### 4.9 删除单个标注
 
-**端点:** `POST /api/v1/annotations/batch-verify`
+**端点:** `DELETE /api/v1/projects/{project_id}/annotations/{annotation_id}`
 
-**请求体:**
-```json
-{
-  "annotation_ids": [5001, 5002, 5003],
-  "is_correct": true
-}
-```
+**响应:** `204 No Content`
 
-**响应:** `200 OK`
+### 4.10 批量删除标注
 
-### 4.6 删除某类别所有标注
-
-**端点:** `DELETE /api/v1/annotation/tasks/{task_id}/labels/{label_name}`
-
-**响应:** `200 OK`
-```json
-{
-  "deleted_count": 50,
-  "message": "All annotations for 'cigarette' have been deleted"
-}
-```
-
-### 4.7 重新标注
-
-**端点:** `POST /api/v1/annotation/tasks/{task_id}/re-annotate`
+**端点:** `POST /api/v1/projects/{project_id}/annotations/batch-delete`
 
 **请求体:**
 ```json
 {
-  "label_names": ["cigarette"],
-  "image_ids": "all",
-  "confidence_threshold": 0.5
+  "annotation_ids": [5001, 5002, 5003]
 }
 ```
 
-**响应:** `201 Created`
+**响应:** `204 No Content`
+
+### 4.11 按标签批量操作
+
+**端点:** `POST /api/v1/projects/{project_id}/annotations/batch-by-label`
+
+**请求体:**
 ```json
 {
-  "new_task_id": 457
+  "label_id": 2,
+  "action": "delete",
+  "task_id": 456
+}
+```
+
+**响应:** `204 No Content`
+
+### 4.12 获取标注统计信息
+
+**端点:** `GET /api/v1/projects/{project_id}/annotations/statistics`
+
+**响应:** `200 OK`
+```json
+{
+  "total_annotations": 680,
+  "by_label": {
+    "smoking_person": 400,
+    "cigarette": 280
+  },
+  "verified_count": 650,
+  "avg_confidence": 0.87
 }
 ```
 
 ---
 
 ## 5. 数据集管理 API
+
+支持 YOLO 和 COCO 格式的数据集生成、版本管理和导出功能。
 
 ### 5.1 创建数据集版本
 
@@ -633,7 +781,7 @@
 
 ### 5.3 获取数据集详情
 
-**端点:** `GET /api/v1/datasets/{version_id}`
+**端点:** `GET /api/v1/projects/{project_id}/datasets/{dataset_id}`
 
 **响应:** `200 OK`
 ```json
@@ -677,42 +825,85 @@
 }
 ```
 
-### 5.4 下载数据集
+### 5.4 删除数据集
 
-**端点:** `GET /api/v1/datasets/{version_id}/download/{format}`
+**端点:** `DELETE /api/v1/projects/{project_id}/datasets/{dataset_id}`
 
-**路径参数:**
-- `format`: `yolo` 或 `coco`
+**响应:** `204 No Content`
 
-**响应:** `200 OK` (文件下载)
-- Content-Type: `application/zip`
-- Content-Disposition: `attachment; filename="smoking_detection_v1.0_yolo.zip"`
+### 5.5 导出数据集
 
-### 5.5 生成K-Fold数据集
-
-**端点:** `POST /api/v1/datasets/{version_id}/generate-kfold`
+**端点:** `POST /api/v1/projects/{project_id}/datasets/{dataset_id}/export`
 
 **请求体:**
 ```json
 {
-  "n_splits": 5,
-  "shuffle": true,
-  "random_seed": 42
+  "format": "yolo",
+  "include_augmented": false
 }
 ```
 
 **响应:** `200 OK`
 ```json
 {
-  "message": "K-Fold datasets generated successfully",
-  "folds": 5,
-  "output_dir": "/path/to/datasets/v1.0/kfold"
+  "download_url": "/api/v1/datasets/789/download/yolo.zip",
+  "file_size_mb": 145.3
+}
+```
+
+### 5.6 重新生成数据集
+
+**端点:** `POST /api/v1/projects/{project_id}/datasets/{dataset_id}/regenerate`
+
+**请求体:**
+```json
+{
+  "regenerate_splits": true,
+  "regenerate_augmentation": true
+}
+```
+
+**响应:** `200 OK`
+
+### 5.7 获取数据集统计
+
+**端点:** `GET /api/v1/projects/{project_id}/datasets/{dataset_id}/statistics`
+
+**响应:** `200 OK`
+```json
+{
+  "total_images": 100,
+  "total_annotations": 350,
+  "split_distribution": {
+    "train": 80,
+    "val": 10,
+    "test": 10
+  },
+  "label_distribution": {
+    "smoking_person": 200,
+    "cigarette": 150
+  }
+}
+```
+
+### 5.8 获取快速统计
+
+**端点:** `GET /api/v1/projects/{project_id}/datasets/quick-stats`
+
+**响应:** `200 OK`
+```json
+{
+  "total_datasets": 5,
+  "latest_version": "v1.4",
+  "total_size_gb": 2.3
 }
 ```
 
 ---
 
 ## 6. 训练管理 API
+
+集成 Ultralytics YOLO 官方库，支持 YOLOv8 和 YOLOv11 全系列模型训练。
 
 ### 6.1 创建训练任务
 
@@ -760,9 +951,20 @@
 }
 ```
 
-### 6.2 获取训练任务状态
+### 6.2 获取项目的训练任务列表
 
-**端点:** `GET /api/v1/training/tasks/{task_id}`
+**端点:** `GET /api/v1/projects/{project_id}/training/tasks`
+
+**查询参数:**
+- `page` (int) - 页码
+- `per_page` (int) - 每页数量
+- `status` (string, 可选) - 过滤状态
+
+**响应:** `200 OK`
+
+### 6.3 获取训练任务详情
+
+**端点:** `GET /api/v1/projects/{project_id}/training/tasks/{task_id}`
 
 **响应:** `200 OK`
 ```json
@@ -798,93 +1000,25 @@
 }
 ```
 
-### 6.3 获取训练日志 (实时流)
+### 6.4 停止训练任务
 
-**端点:** `GET /api/v1/training/tasks/{task_id}/logs`
-
-**响应:** Server-Sent Events (SSE)
-```
-data: {"epoch": 35, "batch": 10, "loss": 0.023}
-
-data: {"epoch": 35, "batch": 11, "loss": 0.022}
-```
-
-### 6.4 获取TensorBoard URL
-
-**端点:** `GET /api/v1/training/tasks/{task_id}/tensorboard`
+**端点:** `POST /api/v1/projects/{project_id}/training/tasks/{task_id}/stop`
 
 **响应:** `200 OK`
 ```json
 {
-  "url": "http://localhost:6006",
-  "is_running": true,
-  "log_dir": "/path/to/runs/run_001"
+  "message": "Training task stopped",
+  "current_epoch": 45
 }
 ```
 
-### 6.5 训练控制
+### 6.5 删除训练任务
 
-**停止训练:** `POST /api/v1/training/tasks/{task_id}/stop`
+**端点:** `DELETE /api/v1/projects/{project_id}/training/tasks/{task_id}`
 
-**响应:** `200 OK`
+**响应:** `204 No Content`
 
-### 6.6 获取训练结果
-
-**端点:** `GET /api/v1/training/tasks/{task_id}/results`
-
-**响应:** `200 OK`
-```json
-{
-  "task_id": 1001,
-  "status": "completed",
-  "total_epochs": 100,
-  "best_epoch": 67,
-  "training_time_seconds": 5832,
-  "final_metrics": {
-    "mAP50": 0.89,
-    "mAP50_95": 0.67,
-    "precision": 0.86,
-    "recall": 0.83
-  },
-  "per_class_metrics": {
-    "smoking_person": {
-      "precision": 0.88,
-      "recall": 0.85,
-      "mAP50": 0.90,
-      "mAP50_95": 0.70
-    },
-    "cigarette": {
-      "precision": 0.84,
-      "recall": 0.81,
-      "mAP50": 0.87,
-      "mAP50_95": 0.64
-    }
-  },
-  "model_path": "/path/to/weights/best.pt",
-  "model_size_mb": 6.2,
-  "charts": {
-    "confusion_matrix": "/api/v1/training/1001/charts/confusion_matrix.png",
-    "results_curve": "/api/v1/training/1001/charts/results.png",
-    "pr_curve": "/api/v1/training/1001/charts/PR_curve.png",
-    "f1_curve": "/api/v1/training/1001/charts/F1_curve.png"
-  }
-}
-```
-
-### 6.7 获取图表
-
-**端点:** `GET /api/v1/training/{task_id}/charts/{chart_name}`
-
-**路径参数:**
-- `chart_name`: confusion_matrix, results, PR_curve, F1_curve
-
-**响应:** `200 OK` (图片文件)
-
----
-
-## 7. 模型管理 API
-
-### 7.1 获取模型列表
+### 6.6 获取项目的所有模型
 
 **端点:** `GET /api/v1/projects/{project_id}/models`
 
@@ -921,155 +1055,120 @@ data: {"epoch": 35, "batch": 11, "loss": 0.022}
 }
 ```
 
-### 7.2 获取模型详情
+### 6.7 获取模型详情
 
-**端点:** `GET /api/v1/models/{model_id}`
-
-**响应:** `200 OK`
-
-### 7.3 模型推理 (单张预测)
-
-**端点:** `POST /api/v1/models/{model_id}/predict`
-
-**请求:** multipart/form-data
-- `image`: 图片文件
-- `confidence`: (可选) 置信度阈值, 默认0.5
-- `iou`: (可选) IoU阈值, 默认0.45
+**端点:** `GET /api/v1/projects/{project_id}/models/{model_id}`
 
 **响应:** `200 OK`
 ```json
 {
-  "predictions": [
+  "id": 2001,
+  "name": "smoking_detector_v1",
+  "yolo_version": "yolov8n",
+  "training_task_id": 1001,
+  "metrics": {
+    "mAP50": 0.89,
+    "mAP50_95": 0.67,
+    "precision": 0.86,
+    "recall": 0.83
+  },
+  "model_path": "/path/to/best.pt",
+  "model_size_mb": 6.2,
+  "created_at": "2025-11-09T15:00:00Z"
+}
+```
+
+### 6.8 获取训练超参数预设
+
+**端点:** `GET /api/v1/training/hyperparameters/presets`
+
+**响应:** `200 OK`
+```json
+{
+  "presets": [
     {
-      "label": "smoking_person",
-      "bbox": [100, 200, 300, 400],
-      "confidence": 0.91
+      "name": "default",
+      "description": "Default training configuration",
+      "params": {
+        "epochs": 100,
+        "batch_size": 16,
+        "lr0": 0.01
+      }
     },
     {
-      "label": "cigarette",
-      "bbox": [250, 350, 280, 380],
-      "confidence": 0.86
+      "name": "fast",
+      "description": "Quick training for testing",
+      "params": {
+        "epochs": 50,
+        "batch_size": 32
+      }
+    },
+    {
+      "name": "accurate",
+      "description": "High accuracy training",
+      "params": {
+        "epochs": 300,
+        "batch_size": 8
+      }
+    },
+    {
+      "name": "augmented",
+      "description": "Training with heavy augmentation",
+      "params": {
+        "mosaic": 1.0,
+        "mixup": 0.5
+      }
     }
-  ],
-  "prediction_count": 2,
-  "visualization_url": "/api/v1/models/2001/predictions/latest.jpg",
-  "inference_time_ms": 15.3
-}
-```
-
-### 7.4 模型评估 (测试集)
-
-**端点:** `POST /api/v1/models/{model_id}/evaluate`
-
-**请求体:**
-```json
-{
-  "dataset_version_id": 789,
-  "split": "test"
-}
-```
-
-**响应:** `200 OK`
-```json
-{
-  "evaluation_id": 3001,
-  "status": "completed",
-  "metrics": {
-    "mAP50": 0.88,
-    "mAP50_95": 0.66,
-    "precision": 0.874,
-    "recall": 0.856
-  },
-  "per_class_metrics": {...},
-  "confusion_matrix_url": "/api/v1/evaluations/3001/confusion_matrix.png"
-}
-```
-
-### 7.5 标记为最佳模型
-
-**端点:** `POST /api/v1/models/{model_id}/mark-best`
-
-**响应:** `200 OK`
-
-### 7.6 部署模型
-
-**端点:** `POST /api/v1/models/{model_id}/deploy`
-
-**响应:** `200 OK`
-```json
-{
-  "message": "Model deployed successfully",
-  "deployment_url": "/api/v1/predict"
+  ]
 }
 ```
 
 ---
 
-## 8. 通用 API
+## 附录
 
-### 8.1 健康检查
+### 支持的 YOLO 模型版本
 
-**端点:** `GET /api/v1/health`
-
-**响应:** `200 OK`
-```json
-{
-  "status": "healthy",
-  "timestamp": "2025-11-09T16:00:00Z",
-  "services": {
-    "database": "ok",
-    "redis": "ok",
-    "celery": "ok",
-    "hunyuan": "ok",
-    "qwen3vl": "ok"
-  },
-  "version": "1.0.0"
-}
+```python
+YOLOv8: yolov8n, yolov8s, yolov8m, yolov8l, yolov8x
+YOLOv11: yolov11n, yolov11s, yolov11m, yolov11l, yolov11x
 ```
 
-### 8.2 系统统计
+### 坐标系统说明
 
-**端点:** `GET /api/v1/stats`
-
-**响应:** `200 OK`
-```json
-{
-  "projects": 5,
-  "total_images": 5000,
-  "total_annotations": 25000,
-  "models_trained": 15,
-  "disk_usage_gb": 45.2,
-  "gpu_available": true
-}
+**Qwen格式** (0-1000):
 ```
+bbox: [x1, y1, x2, y2]  # 归一化到 0-1000 范围
+```
+
+**YOLO格式** (0-1):
+```
+bbox: [center_x, center_y, width, height]  # 归一化到 0-1 范围
+```
+
+**COCO格式** (像素):
+```
+bbox: [x, y, width, height]  # 左上角坐标 + 宽高(像素)
+```
+
+### 旧版本兼容性端点 (已移除)
+
+以下端点在旧版本文档中存在，但未在当前版本实现：
+
+- 模型推理 (单张预测) - 计划在 Phase 13 实现
+- 模型评估 - 计划在 Phase 13 实现
+- 模型部署 - 计划在 Phase 13 实现
+- 健康检查 - 计划在 Phase 10 实现
+- WebSocket 实时更新 - 计划在 Phase 8 实现
 
 ---
 
-## 9. WebSocket API
-
-### 9.1 任务实时更新
-
-**端点:** `WS /api/v1/ws/tasks/{task_id}`
-
-**消息格式 (服务器 → 客户端):**
-```json
-{
-  "type": "progress_update",
-  "task_type": "generation",
-  "task_id": 123,
-  "progress": 56,
-  "message": "Generated 56/100 images",
-  "timestamp": "2025-11-09T10:30:00Z"
-}
-```
-
-**消息类型:**
-- `progress_update` - 进度更新
-- `status_change` - 状态变化
-- `error` - 错误信息
-- `completed` - 任务完成
+**文档版本:** v1.0
+**最后更新:** 2025-11-09
+**对应后端版本:** Phases 1-7 完成
 
 ---
+
 
 ## 错误响应
 
