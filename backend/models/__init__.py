@@ -14,6 +14,7 @@ from backend.models.generation import GenerationTask, Image
 from backend.models.annotation import Annotation, AnnotationTask
 from backend.models.training import Model, TrainingTask
 from backend.models.task_log import TaskLog
+from backend.models.user import User, Role, Permission
 
 
 # 导出所有模型
@@ -29,4 +30,7 @@ __all__ = [
     "TrainingTask",
     "Model",
     "TaskLog",
+    "User",
+    "Role",
+    "Permission",
 ]
