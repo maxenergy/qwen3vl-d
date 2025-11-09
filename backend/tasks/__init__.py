@@ -5,9 +5,10 @@ Celery Tasks Module
 包含所有异步任务定义
 """
 
-from backend.tasks import generation, maintenance
+from backend.tasks import generation, annotation, maintenance
 
 __all__ = [
     "generation",
+    "annotation",
     "maintenance",
 ]

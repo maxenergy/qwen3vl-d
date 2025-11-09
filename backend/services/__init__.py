@@ -10,10 +10,20 @@ from backend.services.prompt_template import (
     PromptTemplateManager,
     template_manager,
 )
+from backend.services.qwen3vl_detector import (
+    BoundingBox,
+    DetectionResult,
+    Qwen3VLClient,
+    get_qwen3vl_client,
+)
 
 __all__ = [
     "HunyuanImageGenerator",
     "PromptTemplate",
     "PromptTemplateManager",
     "template_manager",
+    "BoundingBox",
+    "DetectionResult",
+    "Qwen3VLClient",
+    "get_qwen3vl_client",
 ]
