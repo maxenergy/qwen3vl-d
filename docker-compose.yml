@@ -1,38 +1,156 @@
 version: '3.8'
 
 services:
-  # PostgreSQL数据库
+  # PostgreSQL Database
   postgres:
-    image: postgres:15
-    container_name: auto-annotate-postgres
+    image: postgres:15-alpine
+    container_name: qwen3vl-postgres
     environment:
-      POSTGRES_DB: auto_annotation
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-qwen3vl_db}
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scripts/sql:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d auto_annotation"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - qwen3vl-network
+    restart: unless-stopped
 
-  # Redis
+  # Redis Cache and Message Broker
   redis:
     image: redis:7-alpine
-    container_name: auto-annotate-redis
+    container_name: qwen3vl-redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
-      timeout: 3s
+      timeout: 5s
       retries: 5
+    networks:
+      - qwen3vl-network
+    restart: unless-stopped
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ${BUILD_TARGET:-production}
+    container_name: qwen3vl-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Database
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-qwen3vl_db}
+
+      # Redis
+      REDIS_URL: redis://:${REDIS_PASSWORD:-}@redis:6379/0
+
+      # API
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+
+      # Models
+      QWEN3VL_API_URL: ${QWEN3VL_API_URL:-http://localhost:9292/v1}
+      QWEN3VL_MODEL: ${QWEN3VL_MODEL:-qwen3-vl-30b}
+      HUNYUAN_API_URL: ${HUNYUAN_API_URL:-http://localhost:8000}
+      HUNYUAN_API_KEY: ${HUNYUAN_API_KEY:-}
+
+      # Storage
+      STORAGE_ROOT: /app/storage
+
+      # Celery
+      CELERY_BROKER_URL: redis://:${REDIS_PASSWORD:-}@redis:6379/0
+      CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD:-}@redis:6379/0
+
+      # Environment
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DEBUG: ${DEBUG:-true}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "${API_PORT:-8000}:8000"
     volumes:
-      - redis_data:/data
+      - ./storage:/app/storage
+      - ./logs:/app/logs
+      - .:/app  # Development only - remove in production
+    networks:
+      - qwen3vl-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Celery Worker
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: celery-worker
+    container_name: qwen3vl-celery-worker
+    depends_on:
+      - backend
+      - redis
+      - postgres
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-qwen3vl_db}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-}@redis:6379/0
+      CELERY_BROKER_URL: redis://:${REDIS_PASSWORD:-}@redis:6379/0
+      CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD:-}@redis:6379/0
+      QWEN3VL_API_URL: ${QWEN3VL_API_URL:-http://localhost:9292/v1}
+      HUNYUAN_API_URL: ${HUNYUAN_API_URL:-http://localhost:8000}
+      STORAGE_ROOT: /app/storage
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      - ./storage:/app/storage
+      - ./logs:/app/logs
+    networks:
+      - qwen3vl-network
+    restart: unless-stopped
+
+  # Frontend Web Application
+  frontend:
+    build:
+      context: ./frontend-web
+      dockerfile: Dockerfile
+      target: ${FRONTEND_TARGET:-production}
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+    container_name: qwen3vl-frontend
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    networks:
+      - qwen3vl-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  qwen3vl-network:
+    driver: bridge
 
 volumes:
   postgres_data:
+    driver: local
   redis_data:
+    driver: local
