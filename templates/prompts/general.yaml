@@ -1,0 +1,42 @@
+# 通用图片生成提示词模板
+
+templates:
+  - name: "高质量照片"
+    category: "general"
+    prompt: "high quality photo, professional photography, 8k uhd, detailed, {description}"
+    negative_prompt: "blurry, low quality, distorted, ugly, bad anatomy, watermark, signature, text"
+    params:
+      num_inference_steps: 50
+      guidance_scale: 7.5
+    tags: ["photo", "realistic", "high-quality"]
+    description: "生成高质量的照片风格图片"
+
+  - name: "艺术风格"
+    category: "general"
+    prompt: "artistic style, creative, beautiful composition, {description}"
+    negative_prompt: "blurry, low quality, distorted"
+    params:
+      num_inference_steps: 60
+      guidance_scale: 8.0
+    tags: ["art", "creative"]
+    description: "艺术创作风格"
+
+  - name: "简约风格"
+    category: "general"
+    prompt: "minimalist style, clean, simple, elegant, {description}"
+    negative_prompt: "cluttered, messy, complicated, chaotic"
+    params:
+      num_inference_steps: 40
+      guidance_scale: 7.0
+    tags: ["minimalist", "clean"]
+    description: "简约清爽的风格"
+
+  - name: "自然风光"
+    category: "general"
+    prompt: "natural landscape, beautiful scenery, vivid colors, {description}"
+    negative_prompt: "blurry, low quality, artificial, fake"
+    params:
+      num_inference_steps: 50
+      guidance_scale: 7.5
+    tags: ["nature", "landscape"]
+    description: "自然风光摄影"

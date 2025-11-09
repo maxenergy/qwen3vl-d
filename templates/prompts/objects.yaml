@@ -1,0 +1,72 @@
+# 物体检测相关提示词模板
+
+templates:
+  - name: "车辆场景"
+    category: "vehicles"
+    prompt: "street scene with various vehicles, cars, trucks, buses, motorcycles, clear view, daylight, {description}"
+    negative_prompt: "blurry, low quality, night, dark, occluded"
+    params:
+      num_inference_steps: 50
+      guidance_scale: 7.5
+    tags: ["vehicle", "car", "street", "traffic"]
+    description: "包含各种车辆的街景"
+
+  - name: "停车场"
+    category: "vehicles"
+    prompt: "parking lot with multiple cars, top view, well-lit, organized, {description}"
+    negative_prompt: "blurry, dark, messy, occluded"
+    params:
+      num_inference_steps: 50
+      guidance_scale: 7.5
+    tags: ["parking", "car", "aerial"]
+    description: "停车场俯视图"
+
+  - name: "人物场景"
+    category: "people"
+    prompt: "group of people, clear faces, various poses, natural lighting, {description}"
+    negative_prompt: "blurry, low quality, distorted faces, dark"
+    params:
+      num_inference_steps: 55
+      guidance_scale: 7.5
+    tags: ["people", "person", "crowd"]
+    description: "包含多个人物的场景"
+
+  - name: "室内物品"
+    category: "objects"
+    prompt: "indoor scene with various objects, furniture, appliances, well-lit, organized, {description}"
+    negative_prompt: "blurry, dark, messy, low quality"
+    params:
+      num_inference_steps: 50
+      guidance_scale: 7.0
+    tags: ["indoor", "furniture", "objects"]
+    description: "室内物品场景"
+
+  - name: "餐桌场景"
+    category: "objects"
+    prompt: "dining table with various food items, plates, cups, utensils, appetizing, well-lit, {description}"
+    negative_prompt: "blurry, unappetizing, messy, dark"
+    params:
+      num_inference_steps: 50
+      guidance_scale: 7.5
+    tags: ["food", "dining", "table"]
+    description: "餐桌与食物"
+
+  - name: "动物场景"
+    category: "animals"
+    prompt: "animals in natural environment, clear view, detailed features, {description}"
+    negative_prompt: "blurry, low quality, distorted, unnatural"
+    params:
+      num_inference_steps: 50
+      guidance_scale: 7.5
+    tags: ["animal", "pet", "wildlife"]
+    description: "动物场景"
+
+  - name: "运动场景"
+    category: "sports"
+    prompt: "sports scene, athletes in action, dynamic, clear motion, {description}"
+    negative_prompt: "blurry motion, low quality, static, boring"
+    params:
+      num_inference_steps: 55
+      guidance_scale: 8.0
+    tags: ["sports", "action", "dynamic"]
+    description: "体育运动场景"
