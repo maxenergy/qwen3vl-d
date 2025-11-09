@@ -1,0 +1,10 @@
+.app-logo {
+  height: 32px;
+  margin: 16px;
+}
+
+.site-layout-background {
+  background: #fff;
+  padding: 24px;
+  min-height: 360px;
+}
