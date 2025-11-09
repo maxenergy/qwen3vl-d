@@ -27,8 +27,9 @@ AI Auto-Annotation Tool 是一个完整的端到端目标检测数据集生成�
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                        Frontend (计划中)                      │
-│                    React + TypeScript                        │
+│                    Frontend (Phase 8 完成)                    │
+│         React 18 + TypeScript + Ant Design 5                │
+│         Dashboard | Projects | Generation | Images          │
 └─────────────────────────────────────────────────────────────┘
                               │
 ┌─────────────────────────────────────────────────────────────┐
@@ -55,6 +56,14 @@ AI Auto-Annotation Tool 是一个完整的端到端目标检测数据集生成�
 ```
 
 ### 技术栈
+
+**前端框架**:
+- **React 18** - 现代前端框架
+- **TypeScript** - 类型安全
+- **Vite 5** - 快速构建工具
+- **Ant Design 5** - 企业级 UI 组件库
+- **TanStack Query** - 服务端状态管理
+- **React Router v6** - 路由管理
 
 **后端框架**:
 - **FastAPI** - 高性能 Web 框架
@@ -97,7 +106,7 @@ AI Auto-Annotation Tool 是一个完整的端到端目标检测数据集生成�
 - CUDA 11.8+ (用于 GPU 训练)
 - NVIDIA GPU (推荐 RTX 4090 24GB)
 
-### 安装步骤
+### 后端安装
 
 1. **克隆仓库**
 ```bash
@@ -128,7 +137,7 @@ cp .env.example .env
 alembic upgrade head
 ```
 
-6. **启动服务**
+6. **启动后端服务**
 
 ```bash
 # 启动 Redis
@@ -144,9 +153,32 @@ celery -A backend.tasks.celery_app worker -Q generation,annotation,dataset,train
 uvicorn backend.api.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-7. **访问 API 文档**
+访问 API 文档: http://localhost:8000/docs
+
+### 前端安装
+
+1. **进入前端目录**
+```bash
+cd frontend-web
 ```
-打开浏览器访问: http://localhost:8000/docs
+
+2. **安装依赖**
+```bash
+npm install
+# 或使用 pnpm/yarn
+```
+
+3. **启动开发服务器**
+```bash
+npm run dev
+```
+
+访问 Web 界面: http://localhost:3000
+
+**生产构建**:
+```bash
+npm run build
+npm run preview
 ```
 
 ## 📚 API 端点概览
@@ -477,15 +509,21 @@ pytest --cov=backend tests/
 - [x] Phase 5: 自动标注模块
 - [x] Phase 6: 数据集管理模块
 - [x] Phase 7: 训练模块
+- [x] Phase 8: Web 前端界面 (MVP)
+  - [x] React + TypeScript 应用
+  - [x] 项目管理界面
+  - [x] 图片生成界面
+  - [x] 图片审核界面
+  - [x] Dashboard 概览
 
 ### 🚧 进行中
 
-- [ ] Phase 8: Web 前端界面
-  - [ ] React + TypeScript 应用
-  - [ ] 项目管理界面
-  - [ ] 图片审核界面
-  - [ ] 标注校验界面
+- [ ] Phase 8: Web 前端完善
+  - [ ] 标注管理界面
+  - [ ] 数据集管理界面
   - [ ] 训练监控界面
+  - [ ] 实时进度更新 (WebSocket)
+  - [ ] 图片预览和可视化
 
 ### 📋 计划中
 
