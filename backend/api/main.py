@@ -173,7 +173,7 @@ async def health_check():
 # ============ 注册API路由 ============
 
 # 导入并注册路由模块
-from backend.api.routes import projects, generation, images, annotation, datasets, training
+from backend.api.routes import projects, generation, images, annotation, datasets, training, inference
 
 app.include_router(projects.router, prefix="/api/v1", tags=["Projects"])
 app.include_router(generation.router, prefix="/api/v1", tags=["Generation"])
@@ -181,6 +181,7 @@ app.include_router(images.router, prefix="/api/v1", tags=["Images"])
 app.include_router(annotation.router, prefix="/api/v1", tags=["Annotation"])
 app.include_router(datasets.router, prefix="/api/v1", tags=["Datasets"])
 app.include_router(training.router, prefix="/api/v1", tags=["Training"])
+app.include_router(inference.router, prefix="/api/v1", tags=["Inference"])
 
 # All core API modules now implemented!
 # Future enhancements: model serving, deployment APIs, etc.
