@@ -1,0 +1,49 @@
+# Development Environment Configuration
+
+environment: development
+debug: true
+
+database:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: dev_password
+  database: qwen3vl_dev
+  pool_size: 10
+
+redis:
+  host: localhost
+  port: 6379
+  db: 0
+
+api:
+  host: 0.0.0.0
+  port: 8000
+  workers: 2
+  reload: true
+  cors_origins:
+    - http://localhost:3000
+    - http://localhost:5173
+    - http://127.0.0.1:3000
+    - http://127.0.0.1:5173
+
+storage:
+  root: ./storage_dev
+  max_file_size_mb: 50
+
+models:
+  qwen3vl_api_url: http://localhost:9292/v1
+  qwen3vl_model: qwen3-vl-30b
+  qwen3vl_timeout: 60
+
+  hunyuan_api_url: http://localhost:8000
+  hunyuan_timeout: 120
+
+training:
+  default_epochs: 50
+  default_batch_size: 8
+  checkpoint_interval: 5
+
+logging:
+  level: DEBUG
+  log_file: logs/dev.log

@@ -1,0 +1,50 @@
+# Test Environment Configuration
+
+environment: test
+debug: true
+
+database:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: test_password
+  database: qwen3vl_test
+  pool_size: 5
+
+redis:
+  host: localhost
+  port: 6379
+  db: 1  # Use different DB for testing
+
+api:
+  host: 127.0.0.1
+  port: 8001
+  workers: 1
+  reload: false
+  request_timeout: 60
+
+storage:
+  root: ./storage_test
+  max_file_size_mb: 10
+
+models:
+  qwen3vl_api_url: http://localhost:9292/v1
+  qwen3vl_model: qwen3-vl-30b
+  qwen3vl_timeout: 30
+
+  hunyuan_api_url: http://localhost:8000
+  hunyuan_timeout: 60
+
+training:
+  default_epochs: 10
+  default_batch_size: 4
+  default_device: cpu
+  checkpoint_interval: 2
+
+celery:
+  task_time_limit: 300
+  task_soft_time_limit: 240
+
+logging:
+  level: DEBUG
+  log_file: logs/test.log

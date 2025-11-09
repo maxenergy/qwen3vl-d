@@ -4,7 +4,7 @@ import click
 import os
 from typing import Optional
 from .api_client import APIClient
-from .commands import projects, generation, annotation, datasets, training, images
+from .commands import projects, generation, annotation, datasets, training, images, config
 
 
 @click.group()
@@ -29,6 +29,7 @@ cli.add_command(images.images)
 cli.add_command(annotation.annotation)
 cli.add_command(datasets.datasets)
 cli.add_command(training.training)
+cli.add_command(config.config)
 
 
 if __name__ == '__main__':

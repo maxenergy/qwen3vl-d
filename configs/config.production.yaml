@@ -1,0 +1,62 @@
+# Production Environment Configuration
+
+environment: production
+debug: false
+
+database:
+  host: ${DB_HOST}
+  port: ${DB_PORT:5432}
+  user: ${DB_USER}
+  password: ${DB_PASSWORD}
+  database: ${DB_NAME:qwen3vl_prod}
+  pool_size: 50
+  max_overflow: 20
+
+redis:
+  host: ${REDIS_HOST}
+  port: ${REDIS_PORT:6379}
+  db: 0
+  password: ${REDIS_PASSWORD}
+  max_connections: 100
+
+api:
+  host: 0.0.0.0
+  port: 8000
+  workers: 8
+  reload: false
+  cors_origins:
+    - https://yourdomain.com
+    - https://app.yourdomain.com
+  request_timeout: 600
+
+storage:
+  root: /var/lib/qwen3vl/storage
+  max_file_size_mb: 200
+
+models:
+  qwen3vl_api_url: ${QWEN3VL_API_URL}
+  qwen3vl_model: ${QWEN3VL_MODEL:qwen3-vl-30b}
+  qwen3vl_timeout: 120
+
+  hunyuan_api_url: ${HUNYUAN_API_URL}
+  hunyuan_api_key: ${HUNYUAN_API_KEY}
+  hunyuan_timeout: 300
+
+training:
+  default_epochs: 200
+  default_batch_size: 32
+  default_device: cuda:0
+  checkpoint_interval: 20
+  early_stopping_patience: 100
+
+celery:
+  task_time_limit: 7200
+  task_soft_time_limit: 6600
+  worker_prefetch_multiplier: 2
+  worker_max_tasks_per_child: 500
+
+logging:
+  level: INFO
+  log_file: /var/log/qwen3vl/app.log
+  rotation: "500 MB"
+  retention: "90 days"
