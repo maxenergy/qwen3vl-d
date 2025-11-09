@@ -173,16 +173,16 @@ async def health_check():
 # ============ 注册API路由 ============
 
 # 导入并注册路由模块
-from backend.api.routes import projects, generation, images, annotation
+from backend.api.routes import projects, generation, images, annotation, datasets
 
 app.include_router(projects.router, prefix="/api/v1", tags=["Projects"])
 app.include_router(generation.router, prefix="/api/v1", tags=["Generation"])
 app.include_router(images.router, prefix="/api/v1", tags=["Images"])
 app.include_router(annotation.router, prefix="/api/v1", tags=["Annotation"])
+app.include_router(datasets.router, prefix="/api/v1", tags=["Datasets"])
 
 # TODO: 其他路由模块待实现
-# from backend.api.routes import datasets, training, models
-# app.include_router(datasets.router, prefix="/api/v1", tags=["Datasets"])
+# from backend.api.routes import training, models
 # app.include_router(training.router, prefix="/api/v1", tags=["Training"])
 # app.include_router(models.router, prefix="/api/v1", tags=["Models"])
 

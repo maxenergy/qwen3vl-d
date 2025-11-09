@@ -16,6 +16,12 @@ from backend.services.qwen3vl_detector import (
     Qwen3VLClient,
     get_qwen3vl_client,
 )
+from backend.services.dataset_converter import (
+    YOLODatasetConverter,
+    COCODatasetConverter,
+    DatasetSplitter,
+    DataAugmentationConfig,
+)
 
 __all__ = [
     "HunyuanImageGenerator",
@@ -26,4 +32,8 @@ __all__ = [
     "DetectionResult",
     "Qwen3VLClient",
     "get_qwen3vl_client",
+    "YOLODatasetConverter",
+    "COCODatasetConverter",
+    "DatasetSplitter",
+    "DataAugmentationConfig",
 ]
